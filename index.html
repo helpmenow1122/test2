@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galaxy Community & Messenger</title>
+  <style>
+    :root {
+      --bg-outer: #0f172a;
+      --bezel: #111318;
+      --bezel-border: #2c313d;
+      --surface: #f4f6fa;
+      --card: #ffffff;
+      --text: #141820;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --like: #e11d48;
+      --like-soft: #fff1f2;
+      --msg-me: #2563eb;
+      --msg-other: #e9eef5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b, var(--bg-outer));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    /* 갤럭시 스마트폰 프레임 */
+    .phone-frame {
+      width: 100%;
+      max-width: 412px;
+      height: 844px;
+      max-height: 94vh;
+      background: var(--bezel);
+      border-radius: 44px;
+      padding: 12px;
+      border: 2px solid var(--bezel-border);
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.65),
+        inset 0 0 0 2px #090a0d;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 34px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* 상단 상태바 + 펀치홀 카메라 */
+    .status-bar {
+      height: 36px;
+      padding: 0 20px;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .punch-hole {
+      position: absolute;
+      left: 50%;
+      top: 9px;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #0b0d11;
+      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      color: var(--text);
+    }
+
+    /* 앱 헤더 */
+    .app-header {
+      background: var(--card);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .app-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .nick-badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #bfdbfe;
+    }
+
+    .icon-btn {
+      background: #f3f4f6;
+      border: none;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .icon-btn:hover {
+      background: #e5e7eb;
+    }
+
+    /* 메인 콘텐츠 영역 */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 홈 화면 */
+    .home-screen {
+      flex: 1;
+      background: linear-gradient(155deg, #1d4ed8 0%, #4338ca 52%, #7e22ce 100%);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+    }
+
+    .clock-widget {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .clock-time {
+      font-size: 52px;
+      font-weight: 300;
+      letter-spacing: -1px;
+    }
+
+    .clock-date {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .home-info-card {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .app-tile {
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 22px;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+      color: #fff;
+      position: relative;
+    }
+
+    .app-tile:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .app-icon-circle {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .icon-comm {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+
+    .icon-msg {
+      background: linear-gradient(135deg, #10b981, #047857);
+    }
+
+    .app-tile-label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .unread-pill {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    /* 카드 & 폼 */
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .composer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fafafa;
+      color: var(--text);
+      outline: none;
+      resize: none;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 11px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: var(--text);
+      border: none;
+      border-radius: 10px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    /* 게시글 */
+    .post-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .author-tag {
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .post-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .post-body {
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      margin-bottom: 12px;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .action-btn {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+
+    .action-btn.liked {
+      background: var(--like-soft);
+      border-color: #fecdd3;
+      color: var(--like);
+    }
+
+    /* 댓글 영역 */
+    .comments-box {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .comment-item {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .comment-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .comment-author {
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .comment-like-btn {
+      background: transparent;
+      border: none;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .comment-like-btn.liked {
+      color: var(--like);
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    /* 메신저 앱 */
+    .chat-room-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .chat-room-item:hover {
+      background: #f9fafb;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 15px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .chat-room-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chat-room-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .chat-room-preview {
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 6px;
+    }
+
+    .bubble-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 78%;
+    }
+
+    .bubble-wrap.me {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .bubble-wrap.other {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .bubble-sender {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 2px;
+      padding: 0 4px;
+    }
+
+    .bubble {
+      padding: 9px 13px;
+      border-radius: 16px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .bubble-wrap.me .bubble {
+      background: var(--msg-me);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bubble-wrap.other .bubble {
+      background: var(--msg-other);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-time {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      padding: 0 4px;
+    }
+
+    .chat-input-bar {
+      display: flex;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    /* 하단 앱 전환 바 */
+    .bottom-dock {
+      height: 54px;
+      background: var(--card);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      flex-shrink: 0;
+    }
+
+    .dock-btn {
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .dock-btn.active {
+      color: var(--accent);
+    }
+
+    /* 갤럭시 하단 제스처/네비 바 */
+    .nav-bar {
+      height: 28px;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 36px;
+      flex-shrink: 0;
+    }
+
+    .nav-pill-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 4px 12px;
+    }
+
+    .home-gesture-bar {
+      width: 96px;
+      height: 4px;
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    /* 모바일 화면에서는 프레임 없이 꽉 채우기 */
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+        background: var(--surface);
+      }
+      .phone-frame {
+        max-width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+      }
+      .screen {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-frame">
+    <div class="screen" id="appScreen"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "galaxy_comm_msg_v1";
+
+    // S + 세 자리 숫자(100~999) 랜덤 생성
+    function generateSnick() {
+      const num = Math.floor(100 + Math.random() * 900);
+      return "S" + num;
+    }
+
+    function nowTimeStr() {
+      const d = new Date();
+      return d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    function nowDateStr() {
+      const d = new Date();
+      return d.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function createInitialState() {
+      return {
+        currentApp: "home", // 'home' | 'community' | 'messenger'
+        activeChatRoomId: null,
+        currentSnick: generateSnick(),
+        posts: [
+          {
+            id: "p1",
+            author: "S412",
+            time: "방금 전",
+            title: "익명 닉네임 Snnn 테스트 글",
+            body: "글과 댓글을 쓸 때마다 S + 세 자리 숫자가 부여돼요. 오른쪽 위 '새 닉네임' 버튼으로 언제든 바꿀 수 있습니다!",
+            likes: 3,
+            likedByMe: false,
+            comments: [
+              { id: "c1", author: "S805", time: "2분 전", text: "댓글 좋아요 기능도 잘 되네요!", likes: 1, likedByMe: false }
+            ]
+          },
+          {
+            id: "p2",
+            author: "S194",
+            time: "14분 전",
+            title: "갤럭시 프레임 메신저 앱 후기",
+            body: "하단 독이나 홈 화면에서 메신저 앱으로 바로 넘어가서 채팅할 수 있게 만들어 봤어요.",
+            likes: 5,
+            likedByMe: true,
+            comments: []
+          }
+        ],
+        chatRooms: [
+          {
+            id: "r1",
+            name: "익명 라운지",
+            avatar: "익",
+            unread: 2,
+            messages: [
+              { id: "m1", sender: "S520", fromMe: false, text: "안녕하세요! 오늘 커뮤니티 글 보셨나요?", time: "12:10" },
+              { id: "m2", sender: "S731", fromMe: false, text: "네, Snnn 닉네임이라 깔끔하네요.", time: "12:12" }
+            ]
+          },
+          {
+            id: "r2",
+            name: "프로젝트 DM",
+            avatar: "프",
+            unread: 0,
+            messages: [
+              { id: "m3", sender: "안내 봇", fromMe: false, text: "메시지를 보내면 자동으로 답장이 옵니다.", time: "11:45" }
+            ]
+          }
+        ]
+      };
+    }
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createInitialState();
+        const parsed = JSON.parse(raw);
+        return { ...createInitialState(), ...parsed };
+      } catch {
+        return createInitialState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function rerollNickname() {
+      state.currentSnick = generateSnick();
+      saveState();
+      render();
+    }
+
+    function resetDemoData() {
+      if (!confirm("작성한 글, 댓글, 대화 내역을 초기 상태로 되돌릴까요?")) return;
+      state = createInitialState();
+      saveState();
+      render();
+    }
+
+    function openApp(appName) {
+      state.currentApp = appName;
+      if (appName !== "messenger") {
+        state.activeChatRoomId = null;
+      }
+      saveState();
+      render();
+    }
+
+    function openChatRoom(roomId) {
+      state.currentApp = "messenger";
+      state.activeChatRoomId = roomId;
+      const room = state.chatRooms.find((r) => r.id === roomId);
+      if (room) room.unread = 0;
+      saveState();
+      render();
+    }
+
+    function addPost(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById("postTitleInput");
+      const bodyInput = document.getElementById("postBodyInput");
+      const title = titleInput.value.trim();
+      const body = bodyInput.value.trim();
+      if (!body) return;
+
+      const author = state.currentSnick;
+      state.posts.unshift({
+        id: "p_" + Date.now(),
+        author,
+        time: nowTimeStr(),
+        title: title || "익명 게시글",
+        body,
+        likes: 0,
+        likedByMe: false,
+        comments: []
+      });
+
+      // 다음 글 작성을 위해 새 Snnn 닉네임 자동 갱신
+      state.currentSnick = generateSnick();
+      saveState();
+      render();
+    }
+
+    function togglePostLike(postId) {
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post) return;
+      post.likedByMe = !post.likedByMe;
+      post.likes += post.likedByMe ? 1 : -1;
+      saveState();
+      render();
+    }
+
+    function addComment(e, postId) {
+      e.preventDefault();
+      const input = document.getElementById("commentInput_" + postId);
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post) return;
+
+      post.comments.push({
+        id: "c_" + Date.now(),
+        author: generateSnick(),
+        time: nowTimeStr(),
+        text,
+        likes: 0,
+        likedByMe: false
+      });
+
+      saveState();
+      render();
+    }
+
+    function toggleCommentLike(postId, commentId) {
+      const post = state.posts.find((p) => p.id === postId);
+      if (!post) return;
+      const comment = post.comments.find((c) => c.id === commentId);
+      if (!comment) return;
+      comment.likedByMe = !comment.likedByMe;
+      comment.likes += comment.likedByMe ? 1 : -1;
+      saveState();
+      render();
+    }
+
+    function sendMessage(e, roomId) {
+      e.preventDefault();
+      const input = document.getElementById("chatInput");
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const room = state.chatRooms.find((r) => r.id === roomId);
+      if (!room) return;
+
+      room.messages.push({
+        id: "m_" + Date.now(),
+        sender: state.currentSnick,
+        fromMe: true,
+        text,
+        time: nowTimeStr()
+      });
+      saveState();
+      render();
+
+      const replySender = generateSnick();
+      setTimeout(() => {
+        const targetRoom = state.chatRooms.find((r) => r.id === roomId);
+        if (!targetRoom) return;
+        targetRoom.messages.push({
+          id: "m_" + (Date.now() + 1),
+          sender: replySender,
+          fromMe: false,
+          text: `"${text}" 메시지 확인했어요!`,
+          time: nowTimeStr()
+        });
+        if (state.currentApp !== "messenger" || state.activeChatRoomId !== roomId) {
+          targetRoom.unread = (targetRoom.unread || 0) + 1;
+        }
+        saveState();
+        render();
+      }, 650);
+    }
+
+    function renderStatusBar() {
+      return `
+        <div class="status-bar">
+          <span>${nowTimeStr()}</span>
+          <div class="punch-hole"></div>
+          <div class="status-icons">
+            <span>5G</span>
+            <span>100%</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBottomBar() {
+      const isComm = state.currentApp === "community";
+      const isMsg = state.currentApp === "messenger";
+      const totalUnread = state.chatRooms.reduce((sum, r) => sum + (r.unread || 0), 0);
+
+      return `
+        <div class="bottom-dock">
+          <button class="dock-btn ${isComm ? "active" : ""}" onclick="openApp('community')">
+            <span>📰</span>
+            <span>커뮤니티</span>
+          </button>
+          <button class="dock-btn ${isMsg ? "active" : ""}" onclick="openApp('messenger')">
+            <span>💬${totalUnread > 0 ? " (" + totalUnread + ")" : ""}</span>
+            <span>메신저</span>
+          </button>
+          <button class="dock-btn ${state.currentApp === "home" ? "active" : ""}" onclick="openApp('home')">
+            <span>⊞</span>
+            <span>홈</span>
+          </button>
+        </div>
+        <div class="nav-bar">
+          <button class="nav-pill-btn" title="뒤로가기" onclick="handleBack()">◀</button>
+          <button class="nav-pill-btn" title="홈" onclick="openApp('home')">
+            <div class="home-gesture-bar"></div>
+          </button>
+          <button class="nav-pill-btn" title="초기화" onclick="resetDemoData()">↻</button>
+        </div>
+      `;
+    }
+
+    function handleBack() {
+      if (state.currentApp === "messenger" && state.activeChatRoomId) {
+        state.activeChatRoomId = null;
+        saveState();
+        render();
+      } else if (state.currentApp !== "home") {
+        openApp("home");
+      }
+    }
+
+    function renderHome() {
+      const totalUnread = state.chatRooms.reduce((sum, r) => sum + (r.unread || 0), 0);
+      return `
+        <div class="home-screen">
+          <div class="clock-widget">
+            <div class="clock-time">${nowTimeStr()}</div>
+            <div class="clock-date">${nowDateStr()}</div>
+          </div>
+
+          <div class="home-info-card">
+            현재 부여된 익명 닉네임: <strong>${escapeHtml(state.currentSnick)}</strong><br />
+            커뮤니티 글·댓글 작성 시 <code>Snnn</code> 형식의 익명 닉네임이 자동 생성됩니다.
+          </div>
+
+          <div class="app-grid">
+            <button class="app-tile" onclick="openApp('community')">
+              <div class="app-icon-circle icon-comm">📰</div>
+              <span class="app-tile-label">커뮤니티</span>
+            </button>
+            <button class="app-tile" onclick="openApp('messenger')">
+              ${totalUnread > 0 ? `<span class="unread-pill">${totalUnread}</span>` : ""}
+              <div class="app-icon-circle icon-msg">💬</div>
+              <span class="app-tile-label">메신저</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCommunity() {
+      const postsHtml = state.posts
+        .map((post) => {
+          const commentsHtml = post.comments
+            .map(
+              (c) => `
+              <div class="comment-item">
+                <div class="comment-top">
+                  <span class="comment-author">${escapeHtml(c.author)} · ${escapeHtml(c.time)}</span>
+                  <button class="comment-like-btn ${c.likedByMe ? "liked" : ""}" onclick="toggleCommentLike('${post.id}', '${c.id}')">
+                    <span>${c.likedByMe ? "♥" : "♡"}</span>
+                    <span>${c.likes}</span>
+                  </button>
+                </div>
+                <div>${escapeHtml(c.text)}</div>
+              </div>
+            `
+            )
+            .join("");
+
+          return `
+            <article class="card">
+              <div class="post-meta">
+                <span class="author-tag">${escapeHtml(post.author)}</span>
+                <span>${escapeHtml(post.time)}</span>
+              </div>
+              <div class="post-title">${escapeHtml(post.title)}</div>
+              <div class="post-body">${escapeHtml(post.body)}</div>
+              <div class="post-actions">
+                <button class="action-btn ${post.likedByMe ? "liked" : ""}" onclick="togglePostLike('${post.id}')">
+                  <span>${post.likedByMe ? "♥" : "♡"}</span>
+                  <span>좋아요 ${post.likes}</span>
+                </button>
+                <div class="action-btn" style="cursor:default;">
+                  <span>💬</span>
+                  <span>댓글 ${post.comments.length}</span>
+                </div>
+              </div>
+
+              <div class="comments-box">
+                ${commentsHtml}
+                <form class="comment-form" onsubmit="addComment(event, '${post.id}')">
+                  <input
+                    type="text"
+                    id="commentInput_${post.id}"
+                    placeholder="익명(Snnn)으로 댓글 남기기..."
+                    required
+                  />
+                  <button type="submit" class="btn-secondary">등록</button>
+                </form>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="app-header">
+          <div class="app-title-group">
+            <span class="app-title">커뮤니티</span>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
+        </div>
+        <div class="content">
+          <form class="card" onsubmit="addPost(event)">
+            <div class="composer-row">
+              <span style="font-size:12px; color:var(--muted);">
+                작성 닉네임: <strong>${escapeHtml(state.currentSnick)}</strong>
+              </span>
+              <button type="button" class="btn-secondary" onclick="rerollNickname()">번호 변경</button>
+            </div>
+            <input
+              type="text"
+              id="postTitleInput"
+              placeholder="제목 (선택)"
+              style="margin-bottom:8px;"
+            />
+            <textarea
+              id="postBodyInput"
+              rows="3"
+              placeholder="익명으로 나누고 싶은 이야기를 적어보세요..."
+              required
+            ></textarea>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+              <button type="submit" class="btn-primary">글 올리기</button>
+            </div>
+          </form>
+          ${postsHtml}
+        </div>
+      `;
+    }
+
+    function renderMessenger() {
+      if (state.activeChatRoomId) {
+        const room = state.chatRooms.find((r) => r.id === state.activeChatRoomId);
+        if (!room) {
+          state.activeChatRoomId = null;
+          return renderMessenger();
+        }
+
+        const msgsHtml = room.messages
+          .map(
+            (m) => `
+            <div class="bubble-wrap ${m.fromMe ? "me" : "other"}">
+              ${!m.fromMe ? `<span class="bubble-sender">${escapeHtml(m.sender)}</span>` : ""}
+              <div class="bubble">${escapeHtml(m.text)}</div>
+              <span class="bubble-time">${escapeHtml(m.time)}</span>
+            </div>
+          `
+          )
+          .join("");
+
+        return `
+          <div class="app-header">
+            <div class="app-title-group">
+              <button class="icon-btn" onclick="handleBack()">←</button>
+              <span class="app-title">${escapeHtml(room.name)}</span>
+            </div>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <div class="content" style="display:flex; flex-direction:column;">
+            <div class="chat-messages" id="chatMessagesBox">${msgsHtml}</div>
+            <form class="chat-input-bar" onsubmit="sendMessage(event, '${room.id}')">
+              <input type="text" id="chatInput" placeholder="메시지 입력..." required />
+              <button type="submit" class="btn-primary">전송</button>
+            </form>
+          </div>
+        `;
+      }
+
+      const roomsHtml = state.chatRooms
+        .map((room) => {
+          const lastMsg = room.messages[room.messages.length - 1];
+          const preview = lastMsg ? `${lastMsg.sender}: ${lastMsg.text}` : "대화가 없습니다.";
+          return `
+            <div class="card chat-room-item" onclick="openChatRoom('${room.id}')">
+              <div class="avatar">${escapeHtml(room.avatar)}</div>
+              <div class="chat-room-info">
+                <div class="chat-room-name">${escapeHtml(room.name)}</div>
+                <div class="chat-room-preview">${escapeHtml(preview)}</div>
+              </div>
+              ${room.unread > 0 ? `<span class="unread-pill" style="position:static;">${room.unread}</span>` : ""}
+            </div>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="app-header">
+          <div class="app-title-group">
+            <span class="app-title">메신저</span>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
+        </div>
+        <div class="content">
+          ${roomsHtml}
+        </div>
+      `;
+    }
+
+    function render() {
+      const screen = document.getElementById("appScreen");
+      let mainView = "";
+      if (state.currentApp === "home") mainView = renderHome();
+      else if (state.currentApp === "community") mainView = renderCommunity();
+      else if (state.currentApp === "messenger") mainView = renderMessenger();
+
+      screen.innerHTML = renderStatusBar() + mainView + renderBottomBar();
+
+      const chatBox = document.getElementById("chatMessagesBox");
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    render();
+    setInterval(() => {
+      if (state.currentApp === "home") {
+        render();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
