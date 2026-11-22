@@ -908,4 +908,247 @@
             <span>📰</span>
             <span>커뮤니티</span>
           </button>
-          <button class="dock-btn ${isMsg ? "active" : ""
+          <button class="dock-btn ${isMsg ? "active" : ""}" onclick="openApp('messenger')">
+            <span>💬${totalUnread > 0 ? " (" + totalUnread + ")" : ""}</span>
+            <span>메신저</span>
+          </button>
+          <button class="dock-btn" onclick="openApp('home')">
+            <span>⊞</span>
+            <span>홈</span>
+          </button>
+        </div>
+        <div class="nav-bar">
+          <button class="nav-pill-btn" title="뒤로가기" onclick="handleBack()">◀</button>
+          <button class="nav-pill-btn" title="홈" onclick="openApp('home')">
+            <div class="home-gesture-bar"></div>
+          </button>
+          <button class="nav-pill-btn" title="초기화" onclick="resetDemoData()">↻</button>
+        </div>
+      `;
+    }
+
+    function handleBack() {
+      if (state.currentApp === "messenger" && state.activeChatRoomId) {
+        state.activeChatRoomId = null;
+        saveState();
+        render();
+      } else if (state.currentApp !== "home") {
+        openApp("home");
+      }
+    }
+
+    function renderHome() {
+      const totalUnread = state.chatRooms.reduce((sum, r) => sum + (r.unread || 0), 0);
+      return `
+        <div class="home-screen">
+          <div class="clock-widget">
+            <div class="clock-time">${nowTimeStr()}</div>
+            <div class="clock-date">${nowDateStr()}</div>
+          </div>
+
+          <div class="home-info-card">
+            현재 부여된 익명 닉네임: <strong>${escapeHtml(state.currentSnick)}</strong><br />
+            커뮤니티 글·댓글 작성 시 <code>Snnn</code> 형식의 익명 닉네임이 자동 생성됩니다.
+          </div>
+
+          <div class="app-grid">
+            <button class="app-tile" onclick="openApp('community')">
+              <div class="app-icon-circle icon-comm">📰</div>
+              <span class="app-tile-label">커뮤니티</span>
+            </button>
+            <button class="app-tile" onclick="openApp('messenger')">
+              ${totalUnread > 0 ? `<span class="unread-pill">${totalUnread}</span>` : ""}
+              <div class="app-icon-circle icon-msg">💬</div>
+              <span class="app-tile-label">메신저</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCommunity() {
+      const postsHtml = state.posts
+        .map((post) => {
+          const commentsHtml = post.comments
+            .map(
+              (c) => `
+              <div class="comment-item">
+                <div class="comment-top">
+                  <span class="comment-author">${escapeHtml(c.author)} · ${escapeHtml(c.time)}</span>
+                  <button class="comment-like-btn ${c.likedByMe ? "liked" : ""}" onclick="toggleCommentLike('${post.id}', '${c.id}')">
+                    <span>${c.likedByMe ? "♥" : "♡"}</span>
+                    <span>${c.likes}</span>
+                  </button>
+                </div>
+                <div>${escapeHtml(c.text)}</div>
+              </div>
+            `
+            )
+            .join("");
+
+          return `
+            <article class="card">
+              <div class="post-meta">
+                <span class="author-tag">${escapeHtml(post.author)}</span>
+                <span>${escapeHtml(post.time)}</span>
+              </div>
+              <div class="post-title">${escapeHtml(post.title)}</div>
+              <div class="post-body">${escapeHtml(post.body)}</div>
+              <div class="post-actions">
+                <button class="action-btn ${post.likedByMe ? "liked" : ""}" onclick="togglePostLike('${post.id}')">
+                  <span>${post.likedByMe ? "♥" : "♡"}</span>
+                  <span>좋아요 ${post.likes}</span>
+                </button>
+                <div class="action-btn" style="cursor:default;">
+                  <span>💬</span>
+                  <span>댓글 ${post.comments.length}</span>
+                </div>
+              </div>
+
+              <div class="comments-box">
+                ${commentsHtml}
+                <form class="comment-form" onsubmit="addComment(event, '${post.id}')">
+                  <input
+                    type="text"
+                    id="commentInput_${post.id}"
+                    placeholder="익명(Snnn)으로 댓글 남기기..."
+                    required
+                  />
+                  <button type="submit" class="btn-secondary">등록</button>
+                </form>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="app-header">
+          <div class="app-title-group">
+            <span class="app-title">커뮤니티</span>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
+        </div>
+        <div class="content">
+          <form class="card" onsubmit="addPost(event)">
+            <div class="composer-row">
+              <span style="font-size:12px; color:var(--muted);">
+                작성 닉네임: <strong>${escapeHtml(state.currentSnick)}</strong>
+              </span>
+              <button type="button" class="btn-secondary" onclick="rerollNickname()">번호 변경</button>
+            </div>
+            <input
+              type="text"
+              id="postTitleInput"
+              placeholder="제목 (선택)"
+              style="margin-bottom:8px;"
+            />
+            <textarea
+              id="postBodyInput"
+              rows="3"
+              placeholder="익명으로 나누고 싶은 이야기를 적어보세요..."
+              required
+            ></textarea>
+            <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+              <button type="submit" class="btn-primary">글 올리기</button>
+            </div>
+          </form>
+          ${postsHtml}
+        </div>
+      `;
+    }
+
+    function renderMessenger() {
+      if (state.activeChatRoomId) {
+        const room = state.chatRooms.find((r) => r.id === state.activeChatRoomId);
+        if (!room) {
+          state.activeChatRoomId = null;
+          return renderMessenger();
+        }
+
+        const msgsHtml = room.messages
+          .map(
+            (m) => `
+            <div class="bubble-wrap ${m.fromMe ? "me" : "other"}">
+              ${!m.fromMe ? `<span class="bubble-sender">${escapeHtml(m.sender)}</span>` : ""}
+              <div class="bubble">${escapeHtml(m.text)}</div>
+              <span class="bubble-time">${escapeHtml(m.time)}</span>
+            </div>
+          `
+          )
+          .join("");
+
+        return `
+          <div class="app-header">
+            <div class="app-title-group">
+              <button class="icon-btn" onclick="handleBack()">←</button>
+              <span class="app-title">${escapeHtml(room.name)}</span>
+            </div>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <div class="content" style="display:flex; flex-direction:column;">
+            <div class="chat-messages" id="chatMessagesBox">${msgsHtml}</div>
+            <form class="chat-input-bar" onsubmit="sendMessage(event, '${room.id}')">
+              <input type="text" id="chatInput" placeholder="메시지 입력..." required />
+              <button type="submit" class="btn-primary">전송</button>
+            </form>
+          </div>
+        `;
+      }
+
+      const roomsHtml = state.chatRooms
+        .map((room) => {
+          const lastMsg = room.messages[room.messages.length - 1];
+          const preview = lastMsg ? `${lastMsg.sender}: ${lastMsg.text}` : "대화가 없습니다.";
+          return `
+            <div class="card chat-room-item" onclick="openChatRoom('${room.id}')">
+              <div class="avatar">${escapeHtml(room.avatar)}</div>
+              <div class="chat-room-info">
+                <div class="chat-room-name">${escapeHtml(room.name)}</div>
+                <div class="chat-room-preview">${escapeHtml(preview)}</div>
+              </div>
+              ${room.unread > 0 ? `<span class="unread-pill" style="position:static;">${room.unread}</span>` : ""}
+            </div>
+          `;
+        })
+        .join("");
+
+      return `
+        <div class="app-header">
+          <div class="app-title-group">
+            <span class="app-title">메신저</span>
+            <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
+          </div>
+          <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
+        </div>
+        <div class="content">
+          ${roomsHtml}
+        </div>
+      `;
+    }
+
+    function render() {
+      const screen = document.getElementById("appScreen");
+      let mainView = "";
+      if (state.currentApp === "home") mainView = renderHome();
+      else if (state.currentApp === "community") mainView = renderCommunity();
+      else if (state.currentApp === "messenger") mainView = renderMessenger();
+
+      screen.innerHTML = renderStatusBar() + mainView + renderBottomBar();
+
+      const chatBox = document.getElementById("chatMessagesBox");
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    render();
+    setInterval(() => {
+      if (state.currentApp === "home") {
+        render();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>
