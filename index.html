@@ -444,7 +444,7 @@
       margin-top: 4px;
     }
 
-    /* 메신저 앱 */
+    /* 헌톡 앱 */
     .chat-room-item {
       display: flex;
       align-items: center;
@@ -643,9 +643,9 @@
   <script>
     const STORAGE_KEY = "galaxy_comm_msg_v1";
 
-    // S + 세 자리 숫자(100~999) 랜덤 생성
+    // S + 세 자리 숫자(000~999) 랜덤 생성
     function generateSnick() {
-      const num = Math.floor(100 + Math.random() * 900);
+      const num = Math.floor(000 + Math.random() * 900);
       return "S" + num;
     }
 
@@ -906,11 +906,11 @@
         <div class="bottom-dock">
           <button class="dock-btn ${isComm ? "active" : ""}" onclick="openApp('community')">
             <span>📰</span>
-            <span>커뮤니티</span>
+            <span>S대</span>
           </button>
           <button class="dock-btn ${isMsg ? "active" : ""}" onclick="openApp('messenger')">
             <span>💬${totalUnread > 0 ? " (" + totalUnread + ")" : ""}</span>
-            <span>메신저</span>
+            <span>헌톡</span>
           </button>
           <button class="dock-btn" onclick="openApp('home')">
             <span>⊞</span>
@@ -948,18 +948,18 @@
 
           <div class="home-info-card">
             현재 부여된 익명 닉네임: <strong>${escapeHtml(state.currentSnick)}</strong><br />
-            커뮤니티 글·댓글 작성 시 <code>Snnn</code> 형식의 익명 닉네임이 자동 생성됩니다.
+            S대 글·댓글 작성 시 <code>Snnn</code> 형식의 익명 닉네임이 자동 생성됩니다.
           </div>
 
           <div class="app-grid">
             <button class="app-tile" onclick="openApp('community')">
               <div class="app-icon-circle icon-comm">📰</div>
-              <span class="app-tile-label">커뮤니티</span>
+              <span class="app-tile-label">S대</span>
             </button>
             <button class="app-tile" onclick="openApp('messenger')">
               ${totalUnread > 0 ? `<span class="unread-pill">${totalUnread}</span>` : ""}
               <div class="app-icon-circle icon-msg">💬</div>
-              <span class="app-tile-label">메신저</span>
+              <span class="app-tile-label">헌톡</span>
             </button>
           </div>
         </div>
@@ -1025,7 +1025,7 @@
       return `
         <div class="app-header">
           <div class="app-title-group">
-            <span class="app-title">커뮤니티</span>
+            <span class="app-title">S대</span>
             <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
           </div>
           <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
@@ -1117,7 +1117,7 @@
       return `
         <div class="app-header">
           <div class="app-title-group">
-            <span class="app-title">메신저</span>
+            <span class="app-title">헌톡</span>
             <span class="nick-badge">${escapeHtml(state.currentSnick)}</span>
           </div>
           <button class="icon-btn" onclick="rerollNickname()">새 닉네임</button>
